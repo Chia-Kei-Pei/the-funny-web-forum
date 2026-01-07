@@ -1,0 +1,7 @@
+DROP TABLE IF EXISTS topics;
+
+CREATE TABLE IF NOT EXISTS topics (
+	topic_name VARCHAR(50) PRIMARY KEY
+);
+
+-- INSERT INTO topics VALUES ('asDf1');
