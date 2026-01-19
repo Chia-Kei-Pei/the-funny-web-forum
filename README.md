@@ -6,7 +6,7 @@ Created by Chia Kei Pei.
 2. [A Tour of Go](https://go.dev/tour/list)
 3. [Go and React Full Stack App – Go Tutorial for Node Developers](https://www.youtube.com/watch?v=lNd7XlXwlho) - By freeCodeCamp.org on YouTube.
 4. [PostgreSQL and Go (Golang): Setup, CRUD Examples, and Connection Guide](https://www.w3resource.com/PostgreSQL/snippets/postgresql-golang-guide.php) by w3resource.com
-5. [Chakra-UI Documentation](https://www.chakra-ui.com/docs/get-started/installation]
+5. [Chakra-UI Documentation](https://www.chakra-ui.com/docs/get-started/installation)
 6. [How-to Fix Blocked aria-hidden on an element because its descendant retained focus](https://www.rankya.com/how-to/fix-blocked-aria-hidden-on-an-element-because-its-descendant-retained-focus/)
 7. [Basic writing and formatting syntax](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#links)
 
