@@ -1,0 +1,6 @@
+/* https://www.rankya.com/how-to/fix-blocked-aria-hidden-on-an-element-because-its-descendant-retained-focus/
+*/
+
+.no-aria-hidden-please {
+    pointer-events: none;
+}

@@ -1,4 +1,4 @@
-import { Button, Container, Flex, Spacer, Text } from "@chakra-ui/react";
+import { Button, Container, Flex, Spacer } from "@chakra-ui/react";
 import { useColorMode } from "../ui/color-mode";
 import { LuSun } from "react-icons/lu";
 import { IoMoon } from "react-icons/io5";

@@ -1,8 +1,8 @@
 DROP TABLE IF EXISTS topics;
 
 CREATE TABLE IF NOT EXISTS topics (
-	topic_name VARCHAR(50) PRIMARY KEY
+	topic_name VARCHAR(50) PRIMARY KEY,
 	description VARCHAR(500)
 );
 
--- INSERT INTO topics VALUES ('asDf1');
+INSERT INTO topics VALUES ('Programming', 'Working with computers.');

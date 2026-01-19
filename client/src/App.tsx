@@ -3,6 +3,8 @@ import { CgAdd } from "react-icons/cg"
 import NavBar from "./components/Title/Navbar"
 import TopicList from "./components/Topic/TopicList"
 
+export const BASE_URL = "http://localhost:5000/api";
+
 function App() {
 
   return (

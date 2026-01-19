@@ -7,12 +7,14 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq" // Import pq for PostgreSQL driver
 )
 
 type Topic struct {
-	TopicName string `json:"topic_name"`
+	TopicName   string `json:"topic_name"`
+	Description string `json:"description"`
 }
 
 // global variables
@@ -41,6 +43,11 @@ func main() {
 
 	app := fiber.New()
 
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "http://localhost:5173",
+		AllowHeaders: "Origin,Content-Type,Accept",
+	}))
+
 	PORT := os.Getenv("PORT")
 
 	app.Get("/api/topics", getTopics)
@@ -62,7 +69,7 @@ func getTopics(c *fiber.Ctx) error {
 
 	for rows.Next() {
 		var topic Topic
-		if err := rows.Scan(&topic.TopicName); err != nil {
+		if err := rows.Scan(&topic.TopicName, &topic.Description); err != nil {
 			return err
 		}
 		topics = append(topics, topic)
@@ -80,11 +87,7 @@ func createTopic(c *fiber.Ctx) error {
 		return err
 	}
 
-	if topic.TopicName == "" {
-		return c.Status(400).JSON(fiber.Map{"error": "Topic must have a name"})
-	}
-
-	_, err := db.Exec(`INSERT INTO topics (topic_name) VALUES ($1);`, topic.TopicName)
+	_, err := db.Exec(`INSERT INTO topics (topic_name, description) VALUES ($1, $2);`, topic.TopicName, topic.Description)
 	if err != nil {
 		return err
 	}
@@ -102,7 +105,10 @@ func updateTopicName(c *fiber.Ctx) error {
 		return err
 	}
 
-	_, err := db.Exec(`UPDATE topics SET topic_name = $1 WHERE topic_name = $2;`, new_topic.TopicName, target_topic_name)
+	_, err := db.Exec(`UPDATE topics SET topic_name = $1, description=$2 WHERE topic_name = $3;`,
+		new_topic.TopicName,
+		new_topic.Description,
+		target_topic_name)
 	if err != nil {
 		fmt.Println("main.go updateTopic(): PostgreSQL update command failed")
 		return err

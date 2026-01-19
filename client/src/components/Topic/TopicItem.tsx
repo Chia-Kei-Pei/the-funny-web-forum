@@ -3,38 +3,52 @@
  * https://github.com/burakorkmez/react-go-tutorial/blob/master/client/src/components/TodoItem.tsx
  */
 
-import { Badge, Box, Flex, Stack, Text } from "@chakra-ui/react";
-import { BiEdit } from "react-icons/bi";
-import { MdDelete } from "react-icons/md";
+import { Button, Flex, Spacer, Stack, Text } from "@chakra-ui/react";
+import type { Topic } from "./TopicList";
+import TopicFormDialog from "./TopicFormDialog";
+import TopicDeleteDialog from "./TopicDeleteDialog";
 
-const TopicItem = ({ topic }: { topic: any }) => {
-	return (
-		<Flex gap={2} alignItems={"center"}>
-			<Stack
-                width={"full"}
-				alignItems={"left"}
-                backgroundColor={"gray.500"}
-				paddingY={4}
-                paddingX={10}
-				borderRadius={"lg"}
-				justifyContent={"space-between"}
-            >
-                <Text fontSize={"2xl"} fontWeight={"bold"}>
-                    {topic.topic_name}
-                </Text>
-                <Text>
-                    {topic.description}
-                </Text>
-            </Stack>
-			<Flex gap={2} alignItems={"center"}>
-				<Box color={"blue.500"} cursor={"pointer"}>
-					<BiEdit size={50} />
-				</Box>
-				<Box color={"red.500"} cursor={"pointer"}>
-					<MdDelete size={50} />
-				</Box>
-			</Flex>
-		</Flex>
-	);
+const TopicItem = ({ topic }: { topic: Topic }) => {
+
+    return (
+        <Stack
+            width={"full"}
+            alignItems={"left"}
+            backgroundColor={"gray.500"}
+            paddingY={4}
+            paddingX={10}
+            borderRadius={"lg"}
+            justifyContent={"space-between"}
+        >
+            <Text fontSize={"2xl"} fontWeight={"bold"}>
+                {topic.topic_name}
+            </Text>
+            <Text>
+                {topic.description}
+            </Text>
+            <Flex gap={2} alignItems={"center"}>
+                <Spacer />
+                <Button
+                    size={"sm"}
+                    variant={"ghost"}
+                    onClick={() => {
+                        TopicFormDialog.open("form", { isNew: false, topic: topic })
+                    }}
+                >
+                    Edit
+                </Button>
+                <Button
+                    size={"sm"}
+                    variant={"ghost"}
+                    onClick={() => {
+                        TopicDeleteDialog.open("alert", { topic: topic })
+                    }}
+                >
+                    Delete
+                </Button>
+                <TopicDeleteDialog.Viewport />
+            </Flex>
+        </Stack>
+    );
 };
 export default TopicItem;
