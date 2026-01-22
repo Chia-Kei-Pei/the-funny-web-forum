@@ -85,6 +85,10 @@ const TopicFormDialog = createOverlay<TopicFormDialogProps>((props) => {
                     throw new Error("topic is None");
                 }
 
+                if (hasWhitespace(newTopicName)) {
+                    throw new Error("Topic name cannot have whitespace");
+                }
+
                 const res = await fetch(BASE_URL + `/topics/${topic.topic_name}`, {
                     method: "PATCH",
                     headers: {
