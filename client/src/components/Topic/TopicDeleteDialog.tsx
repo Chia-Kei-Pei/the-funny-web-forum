@@ -6,9 +6,9 @@
  */
 
 import { BASE_URL } from "@/App";
-import { Button, CloseButton, createOverlay, Dialog, DialogFooter, Flex, Input, Portal, Spacer, Spinner, Stack, Text, Textarea } from "@chakra-ui/react";
+import { Button, CloseButton, createOverlay, Dialog, DialogFooter, Portal, Spinner, Text } from "@chakra-ui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRef, useState, type FormEvent } from "react";
+import { useRef } from "react";
 import type { Topic } from "./TopicList";
 
 interface TopicDeleteDialogProps {

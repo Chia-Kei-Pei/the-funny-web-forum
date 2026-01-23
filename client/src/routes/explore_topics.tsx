@@ -1,26 +1,26 @@
-/**
- * Adapted from
- * https://github.com/burakorkmez/react-go-tutorial/blob/master/client/src/components/TodoList.tsx
- */
-
+import { createFileRoute } from '@tanstack/react-router'
 import { Button, Container, Flex, Spacer, Spinner, Stack, Text } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
-import TopicItem from "./TopicItem";
-import TopicFormDialog from "./TopicFormDialog";
+import TopicFormDialog from '@/components/Topic/TopicFormDialog';
+import TopicItem from '@/components/Topic/TopicItem';
 
 export type Topic = {
     topic_name: string;
     description: string;
 };
 
-const TopicList = () => {
+export const Route = createFileRoute('/explore_topics')({
+    component: TopicListComponent,
+})
+
+function TopicListComponent() {
     const { data: topics, isLoading } = useQuery<Topic[]>({
         queryKey: ["topics"],
         queryFn: async () => {
             try {
                 const res = await fetch("http://localhost:5000/api/topics");
                 const data = await res.json();
-                
+
                 if (!res.ok) {
                     throw new Error(data.error || "Something went wrong");
                 }
@@ -40,7 +40,7 @@ const TopicList = () => {
                 <Spacer />
                 <Button
                     onClick={() => {
-                        TopicFormDialog.open("form", {isNew: true})
+                        TopicFormDialog.open("form", { isNew: true })
                     }}
                 >
                     Create Topic
@@ -67,5 +67,4 @@ const TopicList = () => {
             </Stack>
         </Container>
     );
-};
-export default TopicList;
+}

@@ -9,6 +9,7 @@ Created by Chia Kei Pei.
 5. [Chakra-UI Documentation](https://www.chakra-ui.com/docs/get-started/installation)
 6. [How-to Fix Blocked aria-hidden on an element because its descendant retained focus](https://www.rankya.com/how-to/fix-blocked-aria-hidden-on-an-element-because-its-descendant-retained-focus/)
 7. [Basic writing and formatting syntax](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#links)
+8. [Complete TanStack Router Tutorial - Build Type-Safe React Apps with File-Based Routing](https://www.youtube.com/watch?v=WyqxZniJk5w)
 
 ## AI Declaration ##
 I **did** use AI to assist in solving a few bugs. Here is a list of those cases.
