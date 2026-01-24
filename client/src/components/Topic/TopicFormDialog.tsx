@@ -7,10 +7,11 @@
  */
 
 import { BASE_URL } from "@/App";
-import { Button, CloseButton, createOverlay, Dialog, Flex, Input, Portal, Spacer, Spinner, Stack, Text, Textarea } from "@chakra-ui/react";
+import type { Topic } from "@/routes/explore_topics";
+import idRegex from "@/utils";
+import { Button, CloseButton, createOverlay, Dialog, Field, Flex, Input, Portal, Spacer, Spinner, Stack, Text, Textarea } from "@chakra-ui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState, type FormEvent } from "react";
-import type { Topic } from "./TopicList";
 
 interface TopicFormDialogProps {
     isNew: boolean,
@@ -20,7 +21,7 @@ interface TopicFormDialogProps {
 const TopicFormDialog = createOverlay<TopicFormDialogProps>((props) => {
     const refInput = useRef<HTMLInputElement | null>(null);
     const { isNew, topic, ...rest } = props;
-    const [newTopicName, setTopicName] = useState(topic ? topic.topic_name : "");
+    const [newTopicTitle, setTopicName] = useState(topic ? topic.title : "");
     const [newTopicDesc, setTopicDesc] = useState(topic ? topic.description : "");
 
     const queryClient = useQueryClient();
@@ -47,7 +48,7 @@ const TopicFormDialog = createOverlay<TopicFormDialogProps>((props) => {
         mutationFn: async (e: FormEvent) => {
             e.preventDefault();
             try {
-                if (hasWhitespace(newTopicName)) {
+                if (hasWhitespace(newTopicTitle)) {
                     throw new Error("Topic name cannot have whitespace");
                 }
 
@@ -57,7 +58,7 @@ const TopicFormDialog = createOverlay<TopicFormDialogProps>((props) => {
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                        topic_name: newTopicName,
+                        title: newTopicTitle,
                         description: newTopicDesc,
                     })
                 });
@@ -85,17 +86,17 @@ const TopicFormDialog = createOverlay<TopicFormDialogProps>((props) => {
                     throw new Error("topic is None");
                 }
 
-                if (hasWhitespace(newTopicName)) {
+                if (hasWhitespace(newTopicTitle)) {
                     throw new Error("Topic name cannot have whitespace");
                 }
 
-                const res = await fetch(BASE_URL + `/topics/${topic.topic_name}`, {
+                const res = await fetch(BASE_URL + `/topics/${topic.title}`, {
                     method: "PATCH",
                     headers: {
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                        topic_name: newTopicName,
+                        title: newTopicTitle,
                         description: newTopicDesc,
                     })
                 });
@@ -129,13 +130,21 @@ const TopicFormDialog = createOverlay<TopicFormDialogProps>((props) => {
                         <Dialog.Body>
                             <form onSubmit={isNew ? createTopic : editTopic}>
                                 <Stack gap={4}>
-                                    <Input
-                                        placeholder="Topic Name"
-                                        type='text'
-                                        value={newTopicName}
-                                        onChange={(e) => setTopicName(e.target.value)}
-                                        ref={refInput}
-                                    />
+                                    <Field.Root required>
+                                        <Input
+                                            placeholder="Topic Name"
+                                            type='text'
+                                            value={newTopicTitle}
+                                            onChange={(e) => {
+                                                if (!idRegex.test(e.target.value)) {
+                                                    e.preventDefault();
+                                                } else {
+                                                    setTopicName(e.target.value)
+                                                }
+                                            }}
+                                            ref={refInput}
+                                        />
+                                    </Field.Root>
                                     <Textarea
                                         placeholder="Description"
                                         value={newTopicDesc}

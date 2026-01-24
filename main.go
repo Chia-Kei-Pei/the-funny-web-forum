@@ -13,7 +13,7 @@ import (
 )
 
 type Topic struct {
-	TopicName   string `json:"topic_name"`
+	Title   string `json:"title"`
 	Description string `json:"description"`
 }
 
@@ -50,12 +50,32 @@ func main() {
 
 	PORT := os.Getenv("PORT")
 
+	app.Get("/api/topics/:title", getTopic)
 	app.Get("/api/topics", getTopics)
 	app.Post("/api/topics", createTopic)
-	app.Patch("/api/topics/:topic_name", updateTopicName)
-	app.Delete("/api/topics/:topic_name", deleteTopic)
+	app.Patch("/api/topics/:title", updateTopic)
+	app.Delete("/api/topics/:title", deleteTopic)
 
 	log.Fatal(app.Listen(":" + PORT))
+}
+
+func getTopic(c *fiber.Ctx) error {
+	target_topic_title := c.Params("title")
+	var topic Topic
+
+	row := db.QueryRow(`SELECT * FROM topics WHERE title = $1;`, target_topic_title)
+	err := row.Scan(&topic.Title, &topic.Description)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "Topic not found",
+			})
+		}
+		return err
+	}
+
+	return c.JSON(topic)
 }
 
 func getTopics(c *fiber.Ctx) error {
@@ -69,7 +89,7 @@ func getTopics(c *fiber.Ctx) error {
 
 	for rows.Next() {
 		var topic Topic
-		if err := rows.Scan(&topic.TopicName, &topic.Description); err != nil {
+		if err := rows.Scan(&topic.Title, &topic.Description); err != nil {
 			return err
 		}
 		topics = append(topics, topic)
@@ -87,7 +107,7 @@ func createTopic(c *fiber.Ctx) error {
 		return err
 	}
 
-	_, err := db.Exec(`INSERT INTO topics (topic_name, description) VALUES ($1, $2);`, topic.TopicName, topic.Description)
+	_, err := db.Exec(`INSERT INTO topics (title, description) VALUES ($1, $2);`, topic.Title, topic.Description)
 	if err != nil {
 		return err
 	}
@@ -95,8 +115,8 @@ func createTopic(c *fiber.Ctx) error {
 	return c.Status(201).JSON(topic)
 }
 
-func updateTopicName(c *fiber.Ctx) error {
-	target_topic_name := c.Params("topic_name")
+func updateTopic(c *fiber.Ctx) error {
+	target_topic_title := c.Params("title")
 
 	new_topic := new(Topic)
 	// bind the request body to the struct, topic
@@ -105,10 +125,10 @@ func updateTopicName(c *fiber.Ctx) error {
 		return err
 	}
 
-	_, err := db.Exec(`UPDATE topics SET topic_name = $1, description=$2 WHERE topic_name = $3;`,
-		new_topic.TopicName,
+	_, err := db.Exec(`UPDATE topics SET title = $1, description=$2 WHERE title = $3;`,
+		new_topic.Title,
 		new_topic.Description,
-		target_topic_name)
+		target_topic_title)
 	if err != nil {
 		fmt.Println("main.go updateTopic(): PostgreSQL update command failed")
 		return err
@@ -118,9 +138,9 @@ func updateTopicName(c *fiber.Ctx) error {
 }
 
 func deleteTopic(c *fiber.Ctx) error {
-	target_topic_name := c.Params("topic_name")
+	target_topic_title := c.Params("title")
 
-	_, err := db.Exec(`DELETE FROM topics WHERE topic_name = $1`, target_topic_name)
+	_, err := db.Exec(`DELETE FROM topics WHERE title = $1`, target_topic_title)
 	if err != nil {
 		fmt.Println("main.go deleteTopic(): PostgreSQL delete command failed")
 		return err

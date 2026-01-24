@@ -82,4 +82,8 @@ But eventually, this code was removed.
 
 5. Got an error message in the browser complaining about aria-hidden being set to true on a hidden element. I asked Google Gemini twice to help solve the problem. Its answer didn't work. Found the solution on a website (see index.css). Didn't end up using Gemini's solutions in the end.
 
-From all these AI assistance, none of them wrote code directly into my project. I believe I have not commited plagarism in this.
+6. Asked Duck.ai (from DuckDuckGo) what is prefetching, preloading and pending in TanStack Router? Then it explained to me that those are about handling data and loading in a web app.
+
+7. Duck.ai again. I was trying to use GoLang to query a row from my Postgresql database, but it kept having an error "pq: got 1 parameters but the statement requires 0". Passed in the function code of getTopic() in main.go. I went back and forth with Duck.ai. None of its solutions seemed to work. Eventually found that error was not in main.go function, but with an unnecessary try-catch block in $topic.tsx loader argument. See duck.ai_2026-01-24_09-21-12.txt for full chat.
+
+I did not use an AI which wrote code directly into the project and did not blindly use AI output wholesale. I believe I have not commited plagarism in this.

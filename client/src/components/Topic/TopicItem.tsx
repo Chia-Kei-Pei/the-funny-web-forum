@@ -4,9 +4,10 @@
  */
 
 import { Button, Flex, Spacer, Stack, Text } from "@chakra-ui/react";
-import type { Topic } from "./TopicList";
 import TopicFormDialog from "./TopicFormDialog";
 import TopicDeleteDialog from "./TopicDeleteDialog";
+import type { Topic } from "@/routes/explore_topics";
+import { Link } from "@tanstack/react-router";
 
 const TopicItem = ({ topic }: { topic: Topic }) => {
 
@@ -20,9 +21,11 @@ const TopicItem = ({ topic }: { topic: Topic }) => {
             borderRadius={"lg"}
             justifyContent={"space-between"}
         >
-            <Text fontSize={"2xl"} fontWeight={"bold"}>
-                {topic.topic_name}
-            </Text>
+            <Link to="/$topic" params={{topic: topic.title}}>
+                <Text fontSize={"2xl"} fontWeight={"bold"}>
+                    {topic.title}
+                </Text>
+            </Link>
             <Text>
                 {topic.description}
             </Text>

@@ -1,0 +1,287 @@
+﻿This conversation was generated with Duck.ai (https://duck.ai) using OpenAI's GPT-4o mini Model. AI chats may display inaccurate or offensive information (see https://duckduckgo.com/duckai/privacy-terms for more info).
+
+====================
+
+User prompt 1 of 3 - 23/01/2026, 17:33:51:
+I am trying to use GoLang to query a row from my Postgresql database, but it keeps having an error "pq: got 1 parameters but the statement requires 0"
+
+Here is the code:
+func getTopic(c *fiber.Ctx) error {
+	target_topic_name := c.Params("topic_name")
+	var topic Topic
+
+	row := db.QueryRow(`SELECT * FROM topics WHERE topic_name = '$1';`, target_topic_name)
+	if err := row.Scan(&topic.TopicName, &topic.Description); err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return c.JSON(topic)
+} 
+
+Take note of the struc topic:
+type Topic struct {
+	TopicName   string `json:"topic_name"`
+	Description string `json:"description"`
+}
+
+GPT-4o mini:
+The error you're encountering, **"pq: got 1 parameters but the statement requires 0,"** suggests that the parameter in your SQL query is not being correctly recognized by the PostgreSQL driver for Go. In PostgreSQL, parameters should be represented using a numbered placeholder (e.g., `$1`, `$2`), rather than the internal placeholder format you have used.
+
+Here’s how to fix your code:
+
+## Updated Code
+
+Change the QueryRow line to use the correct parameter syntax:
+
+```go
+func getTopic(c *fiber.Ctx) error {
+    target_topic_name := c.Params("topic_name")
+    var topic Topic
+
+    row := db.QueryRow(`SELECT * FROM topics WHERE topic_name = $1;`, target_topic_name) // Corrected line
+    if err := row.Scan(&topic.TopicName, &topic.Description); err != nil {
+        fmt.Println(err)
+        return err
+    }
+
+    return c.JSON(topic)
+}
+```
+
+### Key Changes:
+
+1. **Parameter Syntax**: Use `$1` without quotes. The parameter is passed in as a separate argument in the `QueryRow` method, and the PostgreSQL driver will handle it appropriately.
+
+### Additional Considerations:
+
+- **Error Handling**: Ensure you handle the situation where the query does not return a row (i.e., the topic doesn't exist) to avoid scanning errors. You can check for `sql.ErrNoRows`.
+
+Here’s how to handle that:
+
+```go
+if err := row.Scan(&topic.TopicName, &topic.Description); err != nil {
+    if err == sql.ErrNoRows {
+        return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+            "error": "Topic not found",
+        })
+    }
+    fmt.Println(err)
+    return err
+}
+```
+
+This approach gives more helpful feedback in case the topic is not found in the database.
+
+--------------------
+
+User prompt 2 of 3 - 23/01/2026, 17:45:44:
+I did the changes, but now it's just returning <nil>. target_topic_name has the correct value. Why is it still returning nothing?
+
+func getTopic(c *fiber.Ctx) error {
+	target_topic_name := c.Params("topic_name")
+	var topic Topic
+	
+	fmt.Println(target_topic_name)
+
+	row := db.QueryRow(`SELECT * FROM topics WHERE topic_name = $1;`, target_topic_name)
+	if err := row.Scan(&topic.TopicName, &topic.Description);
+	err != nil {
+		fmt.Println(err)
+		if err == sql.ErrNoRows {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": "Topic not found",
+			})
+		}
+		return err
+	}
+
+	fmt.Println(c.JSON(topic))
+	return c.JSON(topic)
+}
+
+GPT-4o mini:
+If you're getting a result of `<nil>` despite `target_topic_name` having the correct value, this suggests that the query is not returning any rows, or the values fetched do not match what you expect in the `topics` table.
+
+Here are some steps to troubleshoot and resolve the issue:
+
+## Troubleshooting Steps
+
+### 1. **Confirm the Value of `target_topic_name`**
+   - Ensure the value being logged (`fmt.Println(target_topic_name)`) is precisely what you expect. Look for leading or trailing spaces or casing differences that might affect the equality check in the SQL query.
+
+### 2. **Check the Database Manually**
+   - Run the SQL query manually in your PostgreSQL client or console:
+     ```sql
+     SELECT * FROM topics WHERE topic_name = 'YourExpectedTopicName';
+     ```
+   - Ensure this manually executed query returns the expected results.
+
+### 3. **Ensure Correct Structure and Data**
+   - Verify that the columns in the `Topic` struct you’re scanning into (`TopicName` and `Description`) match the structure of the `topics` table in your database, both in naming and type.
+
+### 4. **Debugging Output**
+   - To get more insight into the issue, add a few debugging outputs:
+   ```go
+   fmt.Println("Querying for topic_name:", target_topic_name)
+
+   row := db.QueryRow(`SELECT * FROM topics WHERE topic_name = $1;`, target_topic_name)
+   err := row.Scan(&topic.TopicName, &topic.Description)
+   
+   if err != nil {
+       fmt.Println("Error scanning row:", err)
+       if err == sql.ErrNoRows {
+           return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+               "error": "Topic not found",
+           })
+       }
+       return err
+   }
+
+   fmt.Printf("Retrieved topic: %+v\n", topic) // Add this line
+   return c.JSON(topic)
+   ```
+
+### 5. **Database Connection and Configuration**
+   - Ensure that your database connection is correctly established and that you're querying the intended database. 
+
+### 6. **Sanitizing Input**
+   - Depending on how you're using the `params`, you might also want to sanitize or trim the input to rule out unexpected formatting issues:
+   ```go
+   target_topic_name = strings.TrimSpace(target_topic_name)
+   ```
+
+### 7. **Check for Logs**
+   - Check PostgreSQL logs for any failed queries or issues to see if any errors are reported there. 
+
+### 8. **Check for Case Sensitivity**
+   - PostgreSQL is case-sensitive by default. If `topic_name` in the database was created using mixed or lowercase letters, make sure that your query matches the case exactly. If needed, you can use `LOWER()` to make the comparison case insensitive:
+   ```sql
+   SELECT * FROM topics WHERE LOWER(topic_name) = LOWER($1);
+   ```
+
+Doing these checks will help identify where the issue lies. If everything seems correct, let’s investigate further into the database or `topics` table structure itself. 
+
+--------------------
+
+User prompt 3 of 3 - 23/01/2026, 18:09:13:
+It still is not working. It's not any of the above problems like Database Connection, the target_topic_name, it's just that db.QueryRow() function returns no rows.
+
+I also want to note that there is another app.GET function that fetches all the topics, and that one works. See code below
+
+func main() {
+...
+app.Get("/api/topics/:topic_name", getTopic)
+app.Get("/api/topics", getTopics)
+...
+}
+
+func getTopics(c *fiber.Ctx) error {
+	var topics []Topic
+
+	rows, err := db.Query("SELECT * FROM topics;")
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var topic Topic
+		if err := rows.Scan(&topic.TopicName, &topic.Description); err != nil {
+			return err
+		}
+		topics = append(topics, topic)
+	}
+
+	return c.JSON(topics)
+}
+
+GPT-4o mini:
+Given the context and the fact that your other route fetching all topics works, it leads to a few additional considerations regarding how you're querying the specific topic.
+
+### Possible Issues and Solutions
+
+#### 1. **Check for Trailing Spaces or Case Sensitivity Again**
+Even though you ruled it out initially, consider adding a more rigorous check. Make sure the `topic_name` in the database has no trailing spaces. When retrieving data, ensure that both sides of the comparison are in the same case.
+
+You can modify your SQL query slightly to ignore case and trim whitespace:
+
+```go
+row := db.QueryRow(`SELECT * FROM topics WHERE TRIM(LOWER(topic_name)) = TRIM(LOWER($1));`, target_topic_name)
+```
+
+#### 2. **Logs for the Error**
+Add logs right after executing the query to see if you’re getting an error before the scan:
+
+```go
+row := db.QueryRow(`SELECT * FROM topics WHERE topic_name = $1;`, target_topic_name)
+
+fmt.Println("Executing query with:", target_topic_name) // Add logging here
+
+err := row.Scan(&topic.TopicName, &topic.Description)
+if err != nil {
+    fmt.Println("QueryRow error:", err)
+    if err == sql.ErrNoRows {
+        return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+            "error": "Topic not found",
+        })
+    }
+    return err
+}
+```
+
+#### 3. **Inspect the `getTopics` Route**
+Since `getTopics` works, log the topics returned there. Check if your target topic is among them, which can confirm whether the data itself is correctly stored.
+
+```go
+func getTopics(c *fiber.Ctx) error {
+    var topics []Topic
+
+    rows, err := db.Query("SELECT * FROM topics;")
+    if err != nil {
+        return err
+    }
+    defer rows.Close()
+
+    for rows.Next() {
+        var topic Topic
+        if err := rows.Scan(&topic.TopicName, &topic.Description); err != nil {
+            return err
+        }
+        topics = append(topics, topic)
+    }
+
+    fmt.Println("All topics:", topics) // Log all topics
+    return c.JSON(topics)
+}
+```
+
+#### 4. **Verify Route Handling**
+Double-check that when you access your endpoint, the URL format is correct. For instance, the URL should match the expected format precisely:
+
+- Make sure you're accessing `/api/topics/someTopicName` and that `someTopicName` exactly matches a `topic_name` in your database.
+
+#### 5. **Database Charset**
+Ensure your database doesn't have issues related to encoding, especially if your topic names can contain special characters.
+
+### Testing with Direct SQL Query
+To isolate the issue, you can also create a helper or a main function to run a direct SQL query against your database independently of the Fiber context. For instance:
+
+```go
+func testQuery() {
+    var topic Topic
+    target_topic_name := "TestTopic" // Replace with a known topic name
+
+    row := db.QueryRow(`SELECT * FROM topics WHERE topic_name = $1;`, target_topic_name)
+
+    err := row.Scan(&topic.TopicName, &topic.Description)
+    if err != nil {
+        fmt.Println("Error:", err)
+        return
+    }
+
+    fmt.Printf("Fetched topic: %+v\n", topic)
+}
+```
+
+Call this function from your `main()` to ascertain if the issue exists within the querying or overall routing logic. By following these troubleshooting steps, you should be able to pinpoint the issue with the blank response when querying a specific topic.

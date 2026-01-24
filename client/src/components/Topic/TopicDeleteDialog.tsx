@@ -6,10 +6,10 @@
  */
 
 import { BASE_URL } from "@/App";
+import type { Topic } from "@/routes/explore_topics";
 import { Button, CloseButton, createOverlay, Dialog, DialogFooter, Portal, Spinner, Text } from "@chakra-ui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
-import type { Topic } from "./TopicList";
 
 interface TopicDeleteDialogProps {
     topic: Topic
@@ -37,7 +37,7 @@ const TopicDeleteDialog = createOverlay<TopicDeleteDialogProps>((props) => {
         mutationKey: ["deleteTopic"],        
         mutationFn: async () => {
             try {
-                const res = await fetch(BASE_URL + `/topics/${topic.topic_name}`, {
+                const res = await fetch(BASE_URL + `/topics/${topic.title}`, {
                     method: "DELETE",
                 });
                 const data = await res.json();
@@ -68,7 +68,7 @@ const TopicDeleteDialog = createOverlay<TopicDeleteDialogProps>((props) => {
                             <CloseButton size="sm" />
                         </Dialog.CloseTrigger>
                         <Dialog.Body>
-                            Do you really want to delete the topic, {topic.topic_name}?
+                            Do you really want to delete the topic, {topic.title}?
                         </Dialog.Body>
                         <DialogFooter>
                             <Dialog.ActionTrigger asChild>

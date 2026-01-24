@@ -3,9 +3,10 @@ import { Button, Container, Flex, Spacer, Spinner, Stack, Text } from "@chakra-u
 import { useQuery } from "@tanstack/react-query";
 import TopicFormDialog from '@/components/Topic/TopicFormDialog';
 import TopicItem from '@/components/Topic/TopicItem';
+import { BASE_URL } from '@/App';
 
 export type Topic = {
-    topic_name: string;
+    title: string;
     description: string;
 };
 
@@ -18,7 +19,7 @@ function TopicListComponent() {
         queryKey: ["topics"],
         queryFn: async () => {
             try {
-                const res = await fetch("http://localhost:5000/api/topics");
+                const res = await fetch(BASE_URL + `/topics`);
                 const data = await res.json();
 
                 if (!res.ok) {
@@ -62,7 +63,7 @@ function TopicListComponent() {
             )}
             <Stack gap={4}>
                 {topics?.map((topic) => (
-                    <TopicItem key={topic.topic_name} topic={topic} />
+                    <TopicItem key={topic.title} topic={topic} />
                 ))}
             </Stack>
         </Container>
