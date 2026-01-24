@@ -10,6 +10,7 @@ export const Route = createFileRoute('/$topic')({
         if (!res.ok) {
             throw new Error(topic.error || "Something went wrong");
         }
+        
         return { topic };
     },
 });
