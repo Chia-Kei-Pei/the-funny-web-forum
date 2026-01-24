@@ -19,10 +19,10 @@ type Topic struct {
 }
 
 type Post struct {
-	Topic       string `json:"topic"`
-	Title       string `json:"title"`
-	UserId      string `json:"user_id"`
-	Description string `json:"description"`
+	Topic  string `json:"topic"`
+	Title  string `json:"title"`
+	UserId string `json:"user_id"`
+	Body   string `json:"body"`
 }
 
 // global variables
@@ -172,7 +172,7 @@ func getPost(c *fiber.Ctx) error {
 	var post Post
 
 	row := db.QueryRow(`SELECT * FROM Posts WHERE topic = $1 AND title = $2;`, t_topic_title, t_post_title)
-	err := row.Scan(&post.Topic, &post.Title, &post.UserId, &post.Description)
+	err := row.Scan(&post.Topic, &post.Title, &post.UserId, &post.Body)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -198,7 +198,7 @@ func getPosts(c *fiber.Ctx) error {
 
 	for rows.Next() {
 		var post Post
-		if err := rows.Scan(&post.Topic, &post.Title, &post.UserId, &post.Description); err != nil {
+		if err := rows.Scan(&post.Topic, &post.Title, &post.UserId, &post.Body); err != nil {
 			return err
 		}
 		posts = append(posts, post)
@@ -217,7 +217,7 @@ func createPost(c *fiber.Ctx) error {
 		return err
 	}
 
-	_, err := db.Exec(`INSERT INTO Posts VALUES ($1, $2, $3, $4);`, t_topic_title, post.Title, post.UserId, post.Description)
+	_, err := db.Exec(`INSERT INTO Posts VALUES ($1, $2, $3, $4);`, t_topic_title, post.Title, post.UserId, post.Body)
 	if err != nil {
 		return err
 	}
@@ -237,11 +237,11 @@ func updatePost(c *fiber.Ctx) error {
 		return err
 	}
 
-	_, err := db.Exec(`UPDATE Posts SET (topic, title, user_id, description) = ($1, $2, $3, $4) WHERE topic = $5 AND title = $6;`,
+	_, err := db.Exec(`UPDATE Posts SET (topic, title, user_id, body) = ($1, $2, $3, $4) WHERE topic = $5 AND title = $6;`,
 		post.Topic,
 		post.Title,
 		post.UserId,
-		post.Description,
+		post.Body,
 		t_topic_title,
 		t_post_title)
 	if err != nil {

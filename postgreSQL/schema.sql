@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS Posts (
     topic VARCHAR(100),
     title VARCHAR(200),
     user_id VARCHAR(100),
-	description VARCHAR(10000),
+	body VARCHAR(10000),
     PRIMARY KEY (topic, title),
     FOREIGN KEY (topic) REFERENCES Topics (title) ON UPDATE CASCADE,
     FOREIGN KEY (user_id) REFERENCES Users (id) ON UPDATE CASCADE

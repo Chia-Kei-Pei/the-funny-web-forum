@@ -10,6 +10,8 @@ Created by Chia Kei Pei.
 6. [How-to Fix Blocked aria-hidden on an element because its descendant retained focus](https://www.rankya.com/how-to/fix-blocked-aria-hidden-on-an-element-because-its-descendant-retained-focus/)
 7. [Basic writing and formatting syntax](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#links)
 8. [Complete TanStack Router Tutorial - Build Type-Safe React Apps with File-Based Routing](https://www.youtube.com/watch?v=WyqxZniJk5w)
+9. [Dynamic nested routes using TanStack Router](https://stackoverflow.com/questions/79220915/dynamic-nested-routes-using-tanstack-router)
+10. [Navigating Programmatically with TanStack Router while Preserving Type Safety](https://borstch.com/snippet/navigating-programmatically-with-tanstack-router-while-preserving-type-safety)
 
 ## AI Declaration ##
 I **did** use AI to assist in solving a few bugs. Here is a list of those cases.

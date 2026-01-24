@@ -21,7 +21,7 @@ const TopicItem = ({ topic }: { topic: Topic }) => {
             borderRadius={"lg"}
             justifyContent={"space-between"}
         >
-            <Link to="/$topic" params={{topic: topic.title}}>
+            <Link to="/t/$topic" params={{topic: topic.title}}>
                 <Text fontSize={"2xl"} fontWeight={"bold"}>
                     {topic.title}
                 </Text>

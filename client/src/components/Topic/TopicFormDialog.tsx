@@ -39,19 +39,12 @@ const TopicFormDialog = createOverlay<TopicFormDialogProps>((props) => {
     }
 
     // https://stackoverflow.com/questions/57476487/how-to-check-if-a-string-contains-only-white-space-or-is-empty-in-typescript
-    const hasWhitespace = function(text: string): boolean {
-        return text == null || text.includes(' ');
-    };
 
     const { mutate: createTopic, isPending: isCreating } = useMutation({
         mutationKey: ["createTopic"],
         mutationFn: async (e: FormEvent) => {
             e.preventDefault();
             try {
-                if (hasWhitespace(newTopicTitle)) {
-                    throw new Error("Topic name cannot have whitespace");
-                }
-
                 const res = await fetch(BASE_URL + `/topics`, {
                     method: "POST",
                     headers: {
@@ -84,10 +77,6 @@ const TopicFormDialog = createOverlay<TopicFormDialogProps>((props) => {
             try {
                 if (!topic) {
                     throw new Error("topic is None");
-                }
-
-                if (hasWhitespace(newTopicTitle)) {
-                    throw new Error("Topic name cannot have whitespace");
                 }
 
                 const res = await fetch(BASE_URL + `/topics/${topic.title}`, {
