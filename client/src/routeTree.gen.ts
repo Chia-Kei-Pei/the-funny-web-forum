@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as Explore_topicsRouteImport } from './routes/explore_topics'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
@@ -16,6 +17,11 @@ import { Route as TTopicIndexRouteImport } from './routes/t.$topic.index'
 import { Route as TTopicCreatepostIndexRouteImport } from './routes/t.$topic.createpost.index'
 import { Route as TTopicPPostIndexRouteImport } from './routes/t.$topic.p.$post.index'
 
+const SignUpRoute = SignUpRouteImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const Explore_topicsRoute = Explore_topicsRouteImport.update({
   id: '/explore_topics',
   path: '/explore_topics',
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/explore_topics': typeof Explore_topicsRoute
+  '/sign-up': typeof SignUpRoute
   '/t/$topic/': typeof TTopicIndexRoute
   '/t/$topic/createpost/': typeof TTopicCreatepostIndexRoute
   '/t/$topic/p/$post/': typeof TTopicPPostIndexRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/explore_topics': typeof Explore_topicsRoute
+  '/sign-up': typeof SignUpRoute
   '/t/$topic': typeof TTopicIndexRoute
   '/t/$topic/createpost': typeof TTopicCreatepostIndexRoute
   '/t/$topic/p/$post': typeof TTopicPPostIndexRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/explore_topics': typeof Explore_topicsRoute
+  '/sign-up': typeof SignUpRoute
   '/t/$topic/': typeof TTopicIndexRoute
   '/t/$topic/createpost/': typeof TTopicCreatepostIndexRoute
   '/t/$topic/p/$post/': typeof TTopicPPostIndexRoute
@@ -78,6 +87,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/explore_topics'
+    | '/sign-up'
     | '/t/$topic/'
     | '/t/$topic/createpost/'
     | '/t/$topic/p/$post/'
@@ -86,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/explore_topics'
+    | '/sign-up'
     | '/t/$topic'
     | '/t/$topic/createpost'
     | '/t/$topic/p/$post'
@@ -94,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/explore_topics'
+    | '/sign-up'
     | '/t/$topic/'
     | '/t/$topic/createpost/'
     | '/t/$topic/p/$post/'
@@ -103,6 +115,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   Explore_topicsRoute: typeof Explore_topicsRoute
+  SignUpRoute: typeof SignUpRoute
   TTopicIndexRoute: typeof TTopicIndexRoute
   TTopicCreatepostIndexRoute: typeof TTopicCreatepostIndexRoute
   TTopicPPostIndexRoute: typeof TTopicPPostIndexRoute
@@ -110,6 +123,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sign-up': {
+      id: '/sign-up'
+      path: '/sign-up'
+      fullPath: '/sign-up'
+      preLoaderRoute: typeof SignUpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/explore_topics': {
       id: '/explore_topics'
       path: '/explore_topics'
@@ -159,6 +179,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   Explore_topicsRoute: Explore_topicsRoute,
+  SignUpRoute: SignUpRoute,
   TTopicIndexRoute: TTopicIndexRoute,
   TTopicCreatepostIndexRoute: TTopicCreatepostIndexRoute,
   TTopicPPostIndexRoute: TTopicPPostIndexRoute,
