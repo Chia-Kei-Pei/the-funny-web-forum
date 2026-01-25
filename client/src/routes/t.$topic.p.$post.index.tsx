@@ -9,7 +9,7 @@ import CommentItem from '@/components/Comment/CommentItem';
 
 export type Comment = {
     ID: number;
-    post_id: string;
+    post_id: number;
     user_name: string;
     body: string;
 };
@@ -31,6 +31,7 @@ function RouteComponent() {
     const { post } = Route.useLoaderData();
     const [newPostTitle, setPostTitle] = useState(post.title);
     const [newPostBody, setPostBody] = useState(post.body);
+    const [newCommentBody, setCommentBody] = useState("");
     const [isEditMode, setIsEditMode] = useState(false);
 
     const queryClient = useQueryClient();
@@ -52,11 +53,6 @@ function RouteComponent() {
         },
     });
 
-    const successFn = () => {
-        setIsEditMode(false);
-        queryClient.invalidateQueries({ queryKey: ["posts"] }); // refresh the list
-    };
-
     const errorFn = (error: any) => {
         alert(error.message);
         // TODO: turn errors into user feedback on the UI.
@@ -64,7 +60,7 @@ function RouteComponent() {
         // and "Topic name and description cannot be empty."
     };
 
-    const { mutate: editPost, isPending } = useMutation({
+    const { mutate: editPost, isPending: isEditingPost } = useMutation({
         mutationKey: ["editPost"],
         mutationFn: async (e: FormEvent) => {
             // e.preventDefault(); // need to refresh page to see changes so this is commented out
@@ -93,12 +89,50 @@ function RouteComponent() {
                 throw new Error(error);
             }
         },
-        onSuccess: successFn,
+        onSuccess: () => {
+            setIsEditMode(false);
+            queryClient.invalidateQueries({ queryKey: ["posts"] }); // refresh the list
+        },
         onError: errorFn,
     });
 
+    const { mutate: createComment, isPending: isCreatingComment } = useMutation({
+        mutationKey: ["createComment"],
+        mutationFn: async (e: FormEvent) => {
+            e.preventDefault();
+            try {
+                const res = await fetch(BASE_URL + `/comments`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        ID: null,
+                        post_id: post.ID,
+                        user_name: "thelegend27",
+                        body: newCommentBody,
+                    })
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.error || "Something went wrong");
+                }
+
+                return data;
+            } catch (error: any) {
+                throw new Error(error);
+            }
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["comments"] }); // refresh the list
+            setCommentBody("")
+        },
+        onError: errorFn
+    });
+
     return (
-        <Container maxWidth={1000}>
+        <Container maxWidth={1000} spaceY={4}>
             <Link to="/t/$topic" params={{ topic: post.topic_title }}>
                 <Button>
                     ⬅️ Back to {post.topic_title}
@@ -136,7 +170,7 @@ function RouteComponent() {
                         <Flex>
                             <Spacer />
                             <Button type="submit">
-                                {isPending
+                                {isEditingPost
                                     ? <Spinner size={"xs"} />
                                     : <Text>Confirm</Text>}
                             </Button>
@@ -156,6 +190,25 @@ function RouteComponent() {
                     <PostDeleteDialog.Viewport />
                 </Flex>
             )}
+            <form onSubmit={createComment}>
+                <Field.Root required>
+                    <Flex width={"full"} gap={2}>
+                        <Text>
+                            Commenting as: "thelegend27"
+                        </Text>
+                        <Textarea
+                            placeholder='Comment on this post here.'
+                            value={newCommentBody}
+                            onChange={(e) => setCommentBody(e.target.value)}
+                        />
+                        <Button type="submit">
+                            {isCreatingComment
+                                ? <Spinner size={"xs"} />
+                                : <Text>Comment</Text>}
+                        </Button>
+                    </Flex>
+                </Field.Root>
+            </form>
             {isLoading && (
                 <Flex justifyContent={"center"} my={4}>
                     <Spinner size={"xl"} />

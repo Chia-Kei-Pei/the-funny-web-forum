@@ -27,7 +27,7 @@ type Post struct {
 
 type Comment struct {
 	ID       int    // automatically has `json:"ID"`
-	PostID   string `json:"post_id"`
+	PostID   int    `json:"post_id"`
 	UserName string `json:"user_name"`
 	Body     string `json:"body"`
 }
@@ -169,7 +169,19 @@ func updateTopic(c *fiber.Ctx) error {
 func deleteTopic(c *fiber.Ctx) error {
 	target_topic_title := c.Params("topic_title")
 
-	_, err := db.Exec(`DELETE FROM Topics WHERE title = $1`, target_topic_title)
+	_, err := db.Exec(`DELETE FROM Comments WHERE post_id IN (SELECT id FROM Posts WHERE topic_title = $1)`, target_topic_title)
+	if err != nil {
+		fmt.Println("main.go deleteTopic(): PostgreSQL Comments delete command failed")
+		return err
+	}
+
+	_, err = db.Exec(`DELETE FROM Posts WHERE topic_title = $1`, target_topic_title)
+	if err != nil {
+		fmt.Println("main.go deleteTopic(): PostgreSQL Posts delete command failed")
+		return err
+	}
+
+	_, err = db.Exec(`DELETE FROM Topics WHERE title = $1`, target_topic_title)
 	if err != nil {
 		fmt.Println("main.go deleteTopic(): PostgreSQL delete command failed")
 		return err
@@ -266,7 +278,13 @@ func updatePost(c *fiber.Ctx) error {
 func deletePost(c *fiber.Ctx) error {
 	t_post_id := c.Params("post_id")
 
-	_, err := db.Exec(`DELETE FROM Posts WHERE id = $1;`, t_post_id)
+	_, err := db.Exec(`DELETE FROM Comments WHERE post_id = $1;`, t_post_id)
+	if err != nil {
+		fmt.Println("main.go deletePost(): PostgreSQL Comments deletion failed")
+		return err
+	}
+
+	_, err = db.Exec(`DELETE FROM Posts WHERE id = $1;`, t_post_id)
 	if err != nil {
 		fmt.Println("main.go deletePost(): PostgreSQL delete command failed")
 		return err
@@ -306,7 +324,7 @@ func createComment(c *fiber.Ctx) error {
 		return err
 	}
 
-	_, err := db.Exec(`INSERT INTO Comments (post_id, user_name, body) VALUES ($1, $2, $3, $4);`, comment.PostID, comment.UserName, comment.Body)
+	_, err := db.Exec(`INSERT INTO Comments (post_id, user_name, body) VALUES ($1, $2, $3);`, comment.PostID, comment.UserName, comment.Body)
 	if err != nil {
 		return err
 	}

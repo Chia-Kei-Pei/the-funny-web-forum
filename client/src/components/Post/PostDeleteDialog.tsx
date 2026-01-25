@@ -74,7 +74,7 @@ const PostDeleteDialog = createOverlay<PostDeleteDialogProps>((props) => {
                             <CloseButton size="sm" />
                         </Dialog.CloseTrigger>
                         <Dialog.Body>
-                            Do you really want to delete the post, {post.title}?
+                            Do you really want to delete the post, {post.title} and all its comments?
                         </Dialog.Body>
                         <DialogFooter>
                             <Dialog.ActionTrigger asChild>

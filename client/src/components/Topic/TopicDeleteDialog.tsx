@@ -68,7 +68,7 @@ const TopicDeleteDialog = createOverlay<TopicDeleteDialogProps>((props) => {
                             <CloseButton size="sm" />
                         </Dialog.CloseTrigger>
                         <Dialog.Body>
-                            Do you really want to delete the topic, {topic.title}?
+                            Do you really want to delete the topic, {topic.title}, and all its posts and its comments?
                         </Dialog.Body>
                         <DialogFooter>
                             <Dialog.ActionTrigger asChild>
