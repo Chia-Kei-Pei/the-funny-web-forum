@@ -3,15 +3,15 @@ Created by Chia Kei Pei.
 
 ## How to setup ##
 1. Run `git clone https://github.com/Chia-Kei-Pei/the-funny-web-forum/tree/main`
-2. Open VS Code IDE (optional)
-3. Install the dependencies if don't have (optional? I think this project already contains the downloaded libraries.):
+2. Open `~/the-funny-web-forum/client/postgreSQL/schema.sql` in pgAdmin 4. Run the entire file to initialize the database.
+3. Open VS Code IDE (optional)
+4. Install the dependencies if don't have (optional? I think this project already contains the downloaded libraries.):
     - `npm i @tanstack/react-query @tanstack/react-router @tanstack/react-router-devtools`
     - `npm i --save-dev @tanstack/router-plugin `
     - `npm i @chakra-ui/react`
-4. In one terminal, go to `~/the-funny-web-forum/client/` and run `npm run dev`
-5. In another terminal, go to `~/the-funny-web-forum` and run `air`
-6. Open `http://localhost:5173` on a browser.
-7. Enjoy my web app.
+5. In one terminal, go to `~/the-funny-web-forum/client/` and run `npm run dev`
+6. In another terminal, go to `~/the-funny-web-forum` and run `air`
+7. Open `http://localhost:5173` on a browser to use the web app.
 
 ## Tutorials used ###
 1. [TypeScript: Handbook - The TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
