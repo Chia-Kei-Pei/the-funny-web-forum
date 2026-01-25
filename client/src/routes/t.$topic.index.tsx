@@ -6,9 +6,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import type { Topic } from "./explore_topics";
 
 export type Post = {
-    topic: string;
+    ID: number;
+    topic_title: string;
     title: string;
-    user_id: string;
+    user_name: string;
     body: string;
 };
 
@@ -85,7 +86,7 @@ function TopicPageComponent() {
             )}
             <Stack gap={4}>
                 {posts?.map((post) => (
-                    <PostItem key={post.title} post={post} />
+                    <PostItem key={post.ID} post={post} />
                 ))}
             </Stack>
         </Container>

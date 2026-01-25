@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -19,10 +18,18 @@ type Topic struct {
 }
 
 type Post struct {
-	Topic  string `json:"topic"`
-	Title  string `json:"title"`
-	UserId string `json:"user_id"`
-	Body   string `json:"body"`
+	ID         int    // automatically has `json:"ID"`
+	TopicTitle string `json:"topic_title"`
+	Title      string `json:"title"`
+	UserName   string `json:"user_name"`
+	Body       string `json:"body"`
+}
+
+type Comment struct {
+	ID       int    // automatically has `json:"ID"`
+	PostID   string `json:"post_id"`
+	UserName string `json:"user_name"`
+	Body     string `json:"body"`
 }
 
 // global variables
@@ -66,11 +73,17 @@ func main() {
 	app.Delete("/api/topics/:topic_title", deleteTopic)
 
 	// Query from Posts
-	app.Get("/api/topics/:topic_title/posts/:post_title", getPost)
+	app.Get("/api/posts/:post_id", getPost)
 	app.Get("/api/topics/:topic_title/posts", getPosts)
-	app.Post("/api/topics/:topic_title/posts", createPost)
-	app.Patch("/api/topics/:topic_title/posts/:post_title", updatePost)
-	app.Delete("/api/topics/:topic_title/posts/:post_title", deletePost)
+	app.Post("/api/posts", createPost)
+	app.Patch("/api/posts/:post_id", updatePost)
+	app.Delete("/api/posts/:post_id", deletePost)
+
+	// Query from Comments
+	app.Get("/api/posts/:post_id/comments", getComments)
+	app.Post("/api/comments", createComment)
+	app.Patch("/api/comments/:comment_id", updateComment)
+	app.Delete("/api/comments/:comment_id", deleteComment)
 
 	log.Fatal(app.Listen(":" + PORT))
 }
@@ -141,7 +154,7 @@ func updateTopic(c *fiber.Ctx) error {
 		return err
 	}
 
-	_, err := db.Exec(`UPDATE Topics SET title = $1, description=$2 WHERE title = $3;`,
+	_, err := db.Exec(`UPDATE Topics SET title = $1, description = $2 WHERE title = $3;`,
 		new_topic.Title,
 		new_topic.Description,
 		target_topic_title)
@@ -166,13 +179,11 @@ func deleteTopic(c *fiber.Ctx) error {
 }
 
 func getPost(c *fiber.Ctx) error {
-	t_topic_title := c.Params("topic_title")
-	t_post_title := c.Params("post_title")
-	t_post_title = strings.ReplaceAll(t_post_title, "%20", " ") // replace special character "%20" with space.
+	t_post_id := c.Params("post_id")
 	var post Post
 
-	row := db.QueryRow(`SELECT * FROM Posts WHERE topic = $1 AND title = $2;`, t_topic_title, t_post_title)
-	err := row.Scan(&post.Topic, &post.Title, &post.UserId, &post.Body)
+	row := db.QueryRow(`SELECT * FROM Posts WHERE id = $1;`, t_post_id)
+	err := row.Scan(&post.ID, &post.TopicTitle, &post.Title, &post.UserName, &post.Body)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -190,7 +201,7 @@ func getPosts(c *fiber.Ctx) error {
 	t_topic_title := c.Params("topic_title")
 	var posts []Post
 
-	rows, err := db.Query("SELECT * FROM Posts WHERE topic = $1;", t_topic_title)
+	rows, err := db.Query("SELECT * FROM Posts WHERE topic_title = $1;", t_topic_title)
 	if err != nil {
 		return err
 	}
@@ -198,7 +209,7 @@ func getPosts(c *fiber.Ctx) error {
 
 	for rows.Next() {
 		var post Post
-		if err := rows.Scan(&post.Topic, &post.Title, &post.UserId, &post.Body); err != nil {
+		if err := rows.Scan(&post.ID, &post.TopicTitle, &post.Title, &post.UserName, &post.Body); err != nil {
 			return err
 		}
 		posts = append(posts, post)
@@ -208,7 +219,6 @@ func getPosts(c *fiber.Ctx) error {
 }
 
 func createPost(c *fiber.Ctx) error {
-	t_topic_title := c.Params("topic_title")
 	post := new(Post) // topic is a pointer
 
 	// bind the request body to the struct, topic
@@ -217,7 +227,11 @@ func createPost(c *fiber.Ctx) error {
 		return err
 	}
 
-	_, err := db.Exec(`INSERT INTO Posts VALUES ($1, $2, $3, $4);`, t_topic_title, post.Title, post.UserId, post.Body)
+	_, err := db.Exec(`INSERT INTO Posts (topic_title, title, user_name, body) VALUES ($1, $2, $3, $4);`,
+		post.TopicTitle,
+		post.Title,
+		post.UserName,
+		post.Body)
 	if err != nil {
 		return err
 	}
@@ -226,9 +240,7 @@ func createPost(c *fiber.Ctx) error {
 }
 
 func updatePost(c *fiber.Ctx) error {
-	t_topic_title := c.Params("topic_title")
-	t_post_title := c.Params("post_title")
-	t_post_title = strings.ReplaceAll(t_post_title, `%20`, " ") // replace special character "%20" with space.
+	t_post_id := c.Params("post_id")
 
 	post := new(Post)
 	// bind the request body to the struct, topic
@@ -237,13 +249,12 @@ func updatePost(c *fiber.Ctx) error {
 		return err
 	}
 
-	_, err := db.Exec(`UPDATE Posts SET (topic, title, user_id, body) = ($1, $2, $3, $4) WHERE topic = $5 AND title = $6;`,
-		post.Topic,
+	_, err := db.Exec(`UPDATE Posts SET (topic_title, title, user_name, body) = ($1, $2, $3, $4) WHERE id = $5;`,
+		post.TopicTitle,
 		post.Title,
-		post.UserId,
+		post.UserName,
 		post.Body,
-		t_topic_title,
-		t_post_title)
+		t_post_id)
 	if err != nil {
 		fmt.Println("main.go updatePost(): PostgreSQL update command failed")
 		return err
@@ -253,13 +264,86 @@ func updatePost(c *fiber.Ctx) error {
 }
 
 func deletePost(c *fiber.Ctx) error {
-	t_topic_title := c.Params("topic_title")
-	t_post_title := c.Params("post_title")
-	t_post_title = strings.ReplaceAll(t_post_title, "%20", " ") // replace special character "%20" with space.
+	t_post_id := c.Params("post_id")
 
-	_, err := db.Exec(`DELETE FROM Posts WHERE topic = $1 AND title = $2`, t_topic_title, t_post_title)
+	_, err := db.Exec(`DELETE FROM Posts WHERE id = $1;`, t_post_id)
 	if err != nil {
 		fmt.Println("main.go deletePost(): PostgreSQL delete command failed")
+		return err
+	}
+
+	return c.Status(200).JSON(fiber.Map{"success": true})
+}
+
+func getComments(c *fiber.Ctx) error {
+	t_post_id := c.Params("post_id")
+	var comments []Comment
+
+	rows, err := db.Query("SELECT * FROM Comments WHERE post_id = $1;", t_post_id)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var comment Comment
+		if err := rows.Scan(&comment.ID, &comment.PostID, &comment.UserName, &comment.Body); err != nil {
+			return err
+		}
+
+		comments = append(comments, comment)
+	}
+
+	return c.JSON(comments)
+}
+
+func createComment(c *fiber.Ctx) error {
+	comment := new(Comment) // topic is a pointer
+
+	// bind the request body to the struct, topic
+	if err := c.BodyParser(comment); err != nil {
+		fmt.Println("main.go createComment(): BodyParser failed to parse")
+		return err
+	}
+
+	_, err := db.Exec(`INSERT INTO Comments (post_id, user_name, body) VALUES ($1, $2, $3, $4);`, comment.PostID, comment.UserName, comment.Body)
+	if err != nil {
+		return err
+	}
+
+	return c.Status(201).JSON(comment)
+}
+
+func updateComment(c *fiber.Ctx) error {
+	t_comment_id := c.Params("comment_id")
+
+	comment := new(Comment)
+	// bind the request body to the struct, topic
+	if err := c.BodyParser(comment); err != nil {
+		fmt.Println("main.go updateComment(): BodyParser failed to parse")
+		return err
+	}
+
+	_, err := db.Exec(`UPDATE Comments SET (post_id, user_name, body) = ($1, $2, $3) WHERE id = $4;`,
+		comment.PostID,
+		comment.UserName,
+		comment.Body,
+		t_comment_id)
+	fmt.Println("main.go updateComment(): Comment updated")
+	if err != nil {
+		fmt.Println("main.go updateComment(): PostgreSQL update command failed")
+		return err
+	}
+
+	return c.Status(201).JSON(comment)
+}
+
+func deleteComment(c *fiber.Ctx) error {
+	t_comment_id := c.Params("comment_id")
+
+	_, err := db.Exec(`DELETE FROM Comments WHERE id = $1;`, t_comment_id)
+	if err != nil {
+		fmt.Println("main.go deleteComment(): PostgreSQL delete command failed")
 		return err
 	}
 

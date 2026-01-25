@@ -19,13 +19,13 @@ const PostItem = ({ post }: { post: Post }) => {
             borderRadius={"lg"}
             justifyContent={"space-between"}
         >
-            <Link to="/t/$topic/p/$post" params={{topic: post.topic, post: post.title}}>
+            <Link to="/t/$topic/p/$post" params={{topic: post.topic_title, post: post.ID.toString()}}>
                 <Text fontSize={"2xl"} fontWeight={"bold"}>
                     {post.title}
                 </Text>
             </Link>
             <Text textStyle={"sm"}>
-                By {post.user_id}
+                By {post.user_name}
             </Text>
             <Text>
                 {post.body}

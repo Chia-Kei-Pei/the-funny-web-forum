@@ -27,20 +27,21 @@ function RouteComponent() {
         // and "Topic name and description cannot be empty."
     }
 
-    const { mutate: createPost, isPending: isCreating } = useMutation({
+    const { mutate: createPost, isPending } = useMutation({
         mutationKey: ["createPost"],
         mutationFn: async (e: FormEvent) => {
             e.preventDefault();
             try {
-                const res = await fetch(BASE_URL + `/topics/${topic_title}/posts`, {
+                const res = await fetch(BASE_URL + `/posts`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                        topic: topic_title,
+                        ID: null,
+                        topic_title: topic_title,
                         title: newPostTitle,
-                        user_id: "thelegend27",
+                        user_name: "thelegend27",
                         body: newPostBody,
                     })
                 });
@@ -94,7 +95,7 @@ function RouteComponent() {
                     <Flex>
                         <Spacer />
                         <Button type="submit">
-                            {isCreating
+                            {isPending
                                 ? <Spinner size={"xs"} />
                                 : <Text>Confirm</Text>}
                         </Button>
